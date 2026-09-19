@@ -1,0 +1,46 @@
+/* ==========================================================================
+   cursor.css — 跟随鼠标的光晕（只用一个元素 + transform 动画，GPU 合成）
+   · 尺寸 100×100（比光标略大一圈），多层多色渐变 → 冷紫 / 蓝 / 薄荷 / 桃粉 过渡
+   · 边缘大半径模糊化开（blur 9px），只留一团柔光轮廓
+   · 整体透明度 6%：绚丽但绝不遮挡内容
+   · 不参与点击（pointer-events: none）
+   · 触屏设备 / 系统「减少动态效果」时自动不启用（由 cursor.js 判断）
+   ========================================================================== */
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;   /* 让自己以指针为中心 */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+  will-change: transform;
+  /* 绚丽的多段色环：紫 → 蓝 → 薄荷 → 桃粉收边，中心亮核快速衰减 */
+  background:
+    radial-gradient(closest-side,
+      rgba(226, 198, 255, 1) 0%,
+      rgba(178, 146, 255, 0.88) 18%,
+      rgba(128, 158, 255, 0.68) 36%,
+      rgba(110, 214, 255, 0.46) 54%,
+      rgba(126, 245, 208, 0.30) 70%,
+      rgba(255, 170, 214, 0.16) 84%,
+      rgba(255, 170, 214, 0) 96%);
+  /* 大半径模糊：把色环的边缘彻底化开，只留一团柔光，看不到"圆"的轮廓 */
+  filter: blur(9px) saturate(150%);
+  transform: translate3d(-9999px, -9999px, 0);
+}
+
+/* 整体只有 6% 透明度 */
+.cursor-glow.is-on { opacity: 0.06; }
+
+/* 指针按下时轻微提亮，给一点"有反馈"的呼吸 */
+.cursor-glow.is-press { opacity: 0.11; }
+
+/* 触屏 / 减少动效：直接不渲染 */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .cursor-glow { display: none; }
+}

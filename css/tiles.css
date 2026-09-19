@@ -1,0 +1,139 @@
+/* ==========================================================================
+   tiles.css — 倾斜网格区块（layout:'tiles'）
+   参考 React Bits Pro「Tilted Tiles」：倾斜的图片列网格，随滚动漂移
+   结构：大标题 → 描述 → .tiles（通栏视窗，overflow 裁切）
+        > .tiles__inner（整组微倾放大）> .tiles__col × N（随滚动反向漂移）
+   漂移由 tiles.js 按滚动进度逐帧写入 transform（叠加缓慢自动呼吸）
+   ========================================================================== */
+
+.block--tiles {
+  min-height: 0;                 /* 不占满一屏，自然跟随上一区块 */
+  scroll-snap-align: none;
+  justify-content: center;
+  gap: 0;
+  /* ★ 本区块整体（大标题起）距上方内容 80px。
+     这里是基准值；上一区块的内边距会额外撑开间距，因此挂载后由 tiles.js 的
+     syncGap() 用实测值精确校正到 80px（与画廊的 80px 校准同一套做法） */
+  margin-top: 80px;
+}
+
+/* 标题 / 描述宽度对齐内容区（与 .block--single .media 同一公式） */
+.block--tiles > .gallery__title,
+.block--tiles > .gallery__desc {
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------- 网格视窗
+   通栏出血（与跑马灯同一套 100vw 断出公式）；固定高度裁掉倾斜后越界的部分。
+   上下边缘做一层柔和的纵向渐隐：倾斜网格的四角被化开进背景，
+   不会出现生硬的斜切线（这是纵向渐隐，与跑马灯的左右方向无关）。 */
+.block--tiles > .tiles {
+  width: 100vw;
+  margin-left: calc((100% - 100vw) / 2);
+  margin-top: 44px;
+  position: relative;
+  height: clamp(480px, 84vh, 880px);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg,
+    transparent 0, rgba(0, 0, 0, 0.62) 5%, #000 12%,
+    #000 88%, rgba(0, 0, 0, 0.62) 95%, transparent 100%);
+  mask-image: linear-gradient(180deg,
+    transparent 0, rgba(0, 0, 0, 0.62) 5%, #000 12%,
+    #000 88%, rgba(0, 0, 0, 0.62) 95%, transparent 100%);
+}
+
+/* 整组微倾 + 放大（128% 宽、居中），旋转后四角不会露出背景空缺。
+   注意：128% 不能再收窄 —— 旋转后要盖住四角需要 (W/2)cosθ+(H/2)sinθ ≈ 783px，
+   再叠加漂移带来的水平分量（0.208 × 最大纵向位移 ≈ 110px），余量所剩无几；
+   卡片「变小」请改 config 的 columns（列数），不要改这里的宽度 */
+.tiles__inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 128%;
+  display: flex;
+  gap: clamp(11px, 1.05vw, 16px);
+  transform: translate(-50%, -50%) rotate(-12deg);
+}
+
+/* 列：漂移 transform 由 tiles.js 逐帧写入 */
+.tiles__col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(11px, 1.05vw, 16px);
+  will-change: transform;
+}
+
+/* 小图：与素材同比例（750×1624 手机竖版），cover 逐像素贴合不裁切。
+   卡片尺寸由列数决定（当前 9 列 ≈ 192px 宽），小而密、铺满整个通栏区域；
+   圆角按卡片缩小后重新配比（更大更圆润，接近移动端 App 卡片观感） */
+.tile {
+  margin: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 750 / 1624;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line-1);
+  background: var(--surface-1);
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--dur-line) var(--ease-line), filter 0.4s var(--ease);
+}
+
+/* hover：冷白柔描边（28%）慢慢浮出 + 极轻提亮 */
+.tile:hover {
+  border-color: var(--line-hover);
+  filter: brightness(1.08);
+}
+
+.tile__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.tile.is-failed::after {
+  content: "素材未找到";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--text-3);
+  background: var(--surface-1);
+}
+
+/* ------------------------------------------------------------- 响应式 */
+@media (max-width: 720px) {
+  .block--tiles { margin-top: 88px; }
+
+  .block--tiles > .tiles {
+    height: clamp(360px, 62vh, 620px);
+    -webkit-mask-image: linear-gradient(180deg,
+      transparent 0, rgba(0, 0, 0, 0.62) 6%, #000 14%,
+      #000 86%, rgba(0, 0, 0, 0.62) 94%, transparent 100%);
+    mask-image: linear-gradient(180deg,
+      transparent 0, rgba(0, 0, 0, 0.62) 6%, #000 14%,
+      #000 86%, rgba(0, 0, 0, 0.62) 94%, transparent 100%);
+  }
+
+  /* 窄屏：只显示前 3 列，收窄间距，避免小图过密 */
+  .tiles__inner { width: 150%; gap: 10px; }
+  .tiles__col { gap: 10px; }
+  .tiles__col:nth-child(n + 4) { display: none; }
+}
+
+/* 减少动效：漂移停用（tiles.js 里 REDUCED 直接不写 transform），网格静态呈现 */
+@media (prefers-reduced-motion: reduce) {
+  .tiles__col { transform: none !important; }
+  .tile { transition: none; }
+}

@@ -1,0 +1,302 @@
+/* ==========================================================================
+   components.css — 导航项 / 作品卡片 / 悬停光晕 / 入场动效
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   导航 Tab：纯文字悬浮（无卡片背景 / 无边框 / 无投影）
+   hover 与选中态只用「文字亮度 + 左侧光条 + 柔和文字光晕」表达
+   -------------------------------------------------------------------------- */
+.nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 8px 9px 14px;
+  border-radius: var(--r-sm);
+  border: 0;
+  background: none;
+  box-shadow: none;
+  text-align: left;
+  color: var(--text-3);
+  transition: color var(--dur-2) var(--ease), transform var(--dur-2) var(--ease),
+    text-shadow var(--dur-2) var(--ease);
+}
+
+.nav__item::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  transform: translateY(-50%);
+  transition: height var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
+  opacity: 0;
+}
+
+.nav__no {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: inherit;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+  min-width: 16px;
+}
+
+.nav__label { flex: 1 1 auto; min-width: 0; font-size: 13.5px; font-weight: 500; }
+
+.nav__en {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;      /* 固定常规字重：中文加粗时英文保持轻盈，不被带粗 */
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  opacity: 0.75;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* hover：文字提亮 + 柔和光晕 + 轻微右移（无任何背景框）+ 中文加粗 */
+.nav__item:hover {
+  color: var(--text-1);
+  background: none;
+  transform: translateX(4px);
+  text-shadow: 0 0 18px rgba(155, 176, 255, 0.45);
+}
+
+.nav__item:hover .nav__label { font-weight: 700; }
+
+.nav__item:hover::before { height: 16px; opacity: 0.5; }
+
+/* 选中态：文字最亮 + 左侧光条发光 + 中文加粗 */
+.nav__item.is-active {
+  color: var(--text-1);
+  background: none;
+  text-shadow: 0 0 22px rgba(155, 176, 255, 0.5);
+}
+
+.nav__item.is-active .nav__label { font-weight: 700; }
+
+.nav__item.is-active::before {
+  height: 22px;
+  opacity: 1;
+  box-shadow: 0 0 12px 1px var(--accent-a);
+}
+
+.nav__item.is-active .nav__no { color: var(--accent); opacity: 1; }
+.nav__item.is-active .nav__en { color: var(--text-2); opacity: 0.9; }
+
+/* 滚轮已滚到当前章节尽头：Tab 朝该方向轻推一下（原地提示，不换章）——
+   用 CSS 独立属性 translate，与 :hover 的 transform 平移互不干扰 */
+.nav__item.is-bump-down { animation: navBumpDown 0.44s var(--ease); }
+.nav__item.is-bump-up { animation: navBumpUp 0.44s var(--ease); }
+
+@keyframes navBumpDown {
+  0%, 100% { translate: 0 0; }
+  38% { translate: 0 7px; }
+}
+@keyframes navBumpUp {
+  0%, 100% { translate: 0 0; }
+  38% { translate: 0 -7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__item.is-bump-down,
+  .nav__item.is-bump-up { animation: none; }
+}
+
+/* --------------------------------------------------------------------------
+   作品卡片（图片 / 视频 / GIF 统一外壳）
+   -------------------------------------------------------------------------- */
+.media {
+  position: relative;
+  width: 100%;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--line-1);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out),
+    border-color var(--dur-line) var(--ease-line);
+  will-change: transform;
+}
+
+/* contain = 作品完整可见、永不裁切；尺寸由外层卡片（tile）决定 */
+.media__el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.02);
+  transition: transform var(--dur-3) var(--ease-out), filter var(--dur-3) var(--ease-out);
+}
+
+/* 需要「填满裁切」时（如封面大图），在 config 里给 item 加 fill:true */
+.media[data-fill="true"] .media__el { object-fit: cover; }
+
+/* 视频 / GIF 角标 */
+.media__tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  background: rgba(10, 12, 16, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0.85;
+  transition: opacity var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
+}
+
+.media__tag i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 8px var(--accent-b);
+}
+
+/* 缩放提示按钮 */
+.media__zoom {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: rgba(10, 12, 16, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
+}
+
+.media__zoom svg { width: 14px; height: 14px; fill: none; stroke: var(--text-1); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* hover：上浮 + 图片轻放大 + 冷白柔描边（无投影，避免厚重感）
+   描边本身很淡（--line-hover 28%）且用 --dur-line 慢慢浮出来 —— 线是"柔"的 */
+.media:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-hover);
+  box-shadow: none;
+}
+
+.media:hover .media__el { transform: scale(1.035); }
+.media:hover .media__tag { opacity: 1; color: var(--text-1); }
+.media:hover .media__zoom { opacity: 1; transform: scale(1); }
+.media__zoom:hover { background: rgba(155, 176, 255, 0.22); box-shadow: 0 0 20px -4px var(--accent-a); }
+
+/* hover 顶部微光：极轻的冷色内衬，让描边更有层次（非投影） */
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(120% 80% at 50% -10%, rgba(155, 176, 255, 0.10), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease);
+}
+
+.media:hover::after { opacity: 1; }
+
+/* 可点击（有原图/大图可看）时给出手型光标 */
+.media[data-zoomable="true"] { cursor: zoom-in; }
+
+/* 加载失败兜底 */
+.media.is-failed .media__el { display: none; }
+.media.is-failed::before {
+  content: attr(data-fallback);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 20px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-3);
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 10px, transparent 10px 20px);
+}
+
+/* 未打开的图片占位（懒加载骨架，避免布局跳动） */
+.media__el[data-loading="true"] { opacity: 0; }
+
+/* --------------------------------------------------------------------------
+   入场动效：区块淡入上浮（仅首屏若干区块参与，避免大量重绘）
+   -------------------------------------------------------------------------- */
+@keyframes pf-rise {
+  from { opacity: 0; transform: translate3d(0, 30px, 0); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes pf-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 切章节时整屏入场：位移小一些，避免与卡片自身的升起叠加成"大幅跳动" */
+@keyframes pf-block-rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.section.is-entering > .block {
+  animation: pf-block-rise 0.62s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* 全屏封面只淡入，不做位移（避免整屏视频跳动） */
+.section.is-entering > .block--cover { animation-name: pf-fade; animation-duration: 0.7s; }
+
+.section.is-leaving { opacity: 0; transform: translateY(-6px); transition: opacity 0.16s linear, transform 0.16s linear; }
+
+/* --------------------------------------------------------------------------
+   滚动逐个升起（丝滑版）
+   · 0.9s + ease-out：先快速脱离、尾段极慢收住，视觉上"滑上来"而不是"弹上来"
+   · 同屏多张卡片按 --ri 递进 70ms，层次感更顺
+   · 动画结束后由 reveal.js 摘掉 .reveal/.is-in，避免 fill:both 长期压住 hover 的 transform
+   -------------------------------------------------------------------------- */
+.reveal { opacity: 0; }
+
+.reveal.is-in {
+  animation: pf-rise 0.9s var(--ease-out) both;
+  animation-delay: calc(var(--ri, 0) * 70ms);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal.is-in { animation: none; opacity: 1; }
+}
+
+/* 章节标题条 */
+.block__head.is-empty { display: none; }
+
+/* 小屏 / 触屏不需要 hover 效果 */
+@media (hover: none) {
+  .media__zoom { opacity: 1; transform: none; }
+}

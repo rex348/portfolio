@@ -1,0 +1,228 @@
+/* ==========================================================================
+   stack.css — 滚动堆叠区块（layout:'stack'）
+   参考 React Bits Pro「Scroll Stack」：Pinned cards that stack, turn and
+   dissolve as the page scrolls —— 卡片被钉住（sticky），新卡从下方垂直升起
+   压到顶上，旧卡被压入卡堆：逐级上移、缩退、压暗（不旋转，保持端正，
+   顶缘亮线让堆叠层级一目了然）。媒体以「相框式」内嵌在卡片里（内衬边 +
+   内收圆角 + overflow 裁切），而不是铺满卡片的裸图。
+   结构：大标题 → 描述 → .stack（高 = 视口 + 每卡滚动行程，JS 设定）
+        > .stack__viewport（sticky 钉住层，占满一屏，overflow 裁切）
+        > .stack__stage > .scard × N（transform 由 stack.js 按滚动进度逐帧写入）
+   ========================================================================== */
+
+.block--stack {
+  min-height: 0;                 /* 不占满一屏，自然跟随上一区块 */
+  scroll-snap-align: none;
+  justify-content: center;
+  gap: 0;                        /* 间距交给子元素自己的 margin，保证精确 */
+}
+
+/* 标题 / 描述宽度对齐内容区（与 .block--single .media 同一公式） */
+.block--stack > .gallery__title,
+.block--stack > .gallery__desc {
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------------------ 高度容器 -----
+   总高 = 100vh（钉住首屏）+ (N-1) × 每卡滚动行程 + 末张停留。
+   两个行程参数由 stack.js 在 setup / resize 时按视口高度用 px 精确写入
+   （--stack-step / --stack-hold），这里只给无 JS 时的兜底值。
+   宽度与 .media-grid 一致（内容列宽、超宽屏收敛到 1760px）——
+   卡片因此与上方作品卡片同一宽度、同一中轴，不做通栏出血。 */
+.stack {
+  --stack-step: 62vh;
+  --stack-hold: 45vh;
+  height: calc(100vh + 300vh);   /* 兜底：JS 未运行时也能滚出堆叠过程 */
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  margin-top: 36px;
+  position: relative;
+}
+
+/* ------------------------------------------------------------ 钉住视口 -----
+   卡片在此层内变换；overflow:hidden 防止下方待入场的卡片把页面撑高 */
+.stack__viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.stack__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------- 卡片 --
+   「相框式」卡片：媒体内嵌在卡片里（卡片有可见的边框内衬，媒体圆角内收），
+   而不是一张铺满整个卡片的裸图 —— 视觉上能明确读出「卡片包着媒体」。
+   宽度 = min(可用宽度, 可用高度换算宽度)，与上方作品卡片（.block--single .media）
+   同一公式 → 外框宽度与水平中轴严格一致；
+   高 = 宽 × 940/1920 → 严格 1920×940 比例（MP4 与占位图同比例，cover 不裁切）。
+   水平垂直居中（初始 transform 的 -50% 基准与 JS 写入保持一致） */
+.scard {
+  --scard-inset: 8px;            /* 卡片边框到媒体的内衬宽度（相框边） */
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  height: auto;
+  aspect-ratio: 1920 / 940;
+  padding: var(--scard-inset);
+  overflow: hidden;              /* 媒体被卡片圆角裁切 —— 真正嵌进卡片里 */
+  transform: translate(-50%, -50%);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line-1);
+  background: var(--surface-1);
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform, opacity, filter;
+  box-shadow: 0 24px 60px rgba(4, 6, 12, 0.5);
+  backface-visibility: hidden;
+  /* 描边缓动与其它卡片统一（transform / opacity / filter 由 stack.js 逐帧写入，
+     这里不能给它们加 transition，否则堆叠会拖尾） */
+  transition: border-color var(--dur-line) var(--ease-line);
+}
+
+/* hover：冷白柔描边。只有当前顶卡能接到指针事件（见 stack.js 的 pointer-events） */
+.scard:hover { border-color: var(--line-hover); }
+
+/* 媒体：内收圆角，与卡片边框之间留出相框边 */
+.scard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: calc(var(--r-lg) - var(--scard-inset) - 1px);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 顶卡：前后都投下重阴影 —— 与身后卡片的上缘形成明确的浮起层级 */
+.scard.is-active {
+  box-shadow:
+    0 34px 90px rgba(4, 6, 12, 0.66),
+    0 -16px 44px rgba(4, 6, 12, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* 已被覆盖的卡（is-covered 由 stack.js 在 d>0.05 时挂上）：
+   顶缘一道亮线，堆叠时像一叠纸的「纸边」，层级一目了然 */
+.scard.is-covered {
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* ------------------------------------------------------------- 视频卡片 --
+   MP4 默认停在第一帧（preload=metadata + JS 归零），鼠标移入才播放、
+   移出回到第一帧（交互在 stack.js）；角标提示可播放，播放时淡出 */
+.scard__tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  background: rgba(10, 12, 16, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0.85;
+  pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease);
+}
+
+.scard__tag i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 8px var(--accent-b);
+}
+
+.scard.is-playing .scard__tag { opacity: 0; }
+
+.scard.is-failed::after {
+  content: "素材未找到";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--text-3);
+  background: var(--surface-1);
+}
+
+/* ----------------------------------------------------- 减少动效：静态兜底 --
+   sticky / 逐帧变换全部停用，退化为常规的纵向图文列表，信息不丢失 */
+.stack.is-static {
+  height: auto;
+}
+
+.stack.is-static .stack__viewport {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+
+.stack.is-static .stack__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.stack.is-static .scard {
+  position: static;
+  transform: none;
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  height: auto;
+  aspect-ratio: 1920 / 940;
+}
+
+/* ------------------------------------------------------------- 响应式 */
+@media (max-width: 720px) {
+  .scard__tag { top: calc(var(--scard-inset) + 6px); left: calc(var(--scard-inset) + 6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scard { transition: none; }
+}
+
+/* ------------------------------------------------------------- 徽章网格 -----
+   block.badges：「徽章展示」标题下方的 APNG 徽章墙。
+   · 距标题 50px（margin-top），一行 4 个水平居中对齐，行间距 30px
+   · 每张显示尺寸 = 素材原始尺寸 ÷ 3（render.js onload 后写入行内宽度），
+     高度随比例自适应；窄屏时 max-width 兜底等比收缩，不撑破容器
+   · APNG 用 <img> 原样播放，不做任何格式处理 */
+.badges {
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  margin: 50px auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  column-gap: 40px;
+  row-gap: 30px;
+}
+
+.badges__img {
+  display: block;
+  height: auto;
+  max-width: 100%;           /* 窄屏兜底：等比缩小，保持 APNG 不裁切不变形 */
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .badges { column-gap: 16px; row-gap: 24px; }
+}

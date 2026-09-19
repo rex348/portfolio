@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" data-page-node-id="MGHewud8pG6DMhYjRtHhc9">
+<head data-page-node-id="SGJtNFVANleDH3DLZYLgsX">
+<meta charset="utf-8" data-page-node-id="edFYzrHGozdfbqxSvRWW6i" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" data-page-node-id="ANoWqsKytF9oNOqBZTMufr" />
+<meta name="color-scheme" content="dark" data-page-node-id="dMZvc5kcSFd2vuXgpE695F" />
+<title>Portfolio — UI/UX 设计作品集</title>
+<meta name="description" content="UI/UX 设计师作品集在线演示 · 深色毛玻璃风格 · 60+ 页作品" data-page-node-id="VmorIEXgmFQTYH6n9CYnEd" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0d12'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%239bb0ff'/%3E%3Ccircle cx='21' cy='20' r='4' fill='%238fe3d5'/%3E%3C/svg%3E" data-page-node-id="VkjlQmAJy1GYkubXWMjDau" />
+
+<!-- 样式分层：令牌 / 布局 / 组件 / 封面 / 光晕 / 灯箱 / 响应式 -->
+<link rel="stylesheet" href="css/base.css" data-page-node-id="rJDx4720kdv7wdNjxhm9p7" />
+<link rel="stylesheet" href="css/layout.css" data-page-node-id="D9oGTqj7a3cBBcl5CFbJ7c" />
+<link rel="stylesheet" href="css/components.css" data-page-node-id="prrLbSQ5QBtDDYqmJHMOgZ" />
+<link rel="stylesheet" href="css/cover.css" />
+<link rel="stylesheet" href="css/cursor.css" />
+<link rel="stylesheet" href="css/lightbox.css" data-page-node-id="5c2s8Poge8g2yKPp8rHMEA" />
+<link rel="stylesheet" href="css/carousel.css" />
+<link rel="stylesheet" href="css/tiles.css" />
+<link rel="stylesheet" href="css/stack.css" />
+<link rel="stylesheet" href="css/responsive.css" data-page-node-id="eBwnBD6BxuggWSbvCSTOHJ" />
+</head>
+<body data-page-node-id="nYGAE87cEqDfE6ap9lMpxq">
+
+<!-- 背景层：静态柔光 + 噪点（无动画，保证滚动性能） -->
+<div class="app-bg" aria-hidden="true" data-page-node-id="1KTVdVztlREIkkFWYMg7XD"></div>
+
+<div class="app" data-page-node-id="crzYMGwiF18y35DmtHCYF2">
+
+  <!-- 移动端顶栏（桌面端隐藏） -->
+  <header class="topbar" data-page-node-id="ac4DzInZq66I8SqDakbHX8">
+    <button class="topbar__menu glass" id="menuBtn" aria-expanded="false" aria-controls="sidebar" aria-label="打开章节导航" data-page-node-id="nFCW0y3d1QVU4n0GhuBFD3">
+      <span class="topbar__bars" aria-hidden="true" data-page-node-id="sUvQOlDXgbK0FdMjsnheMI"><i data-page-node-id="N1fEUvcLRi3Vl3vxHwD5cA"></i><i data-page-node-id="TdDR11YleI29mSHcpvMDS0"></i></span>
+    </button>
+    <div class="topbar__title" id="topbarTitle" data-page-node-id="7COYrB9tExl2uDDXRoIA2D">作品集</div>
+  </header>
+
+  <!-- 左侧固定 Tab 导航（纯文字悬浮） -->
+  <aside class="sidebar" id="sidebar" aria-label="作品集章节导航" data-page-node-id="iHe3WtXXd0qyb1YxHhtBvN">
+    <div class="brand" data-page-node-id="a2ECVJrJMF2uOEuw5fpRDr">
+      <img class="brand__mark" src="assets/avatar.jpg" alt="个人头像" width="34" height="34" data-page-node-id="OXN3hCfw0ARw0rjnNEPd3Y" />
+      <div class="brand__text" data-page-node-id="jBbCK5dpPpakV5mHX7K1xs">
+        <h1 class="brand__title" id="brandTitle" data-page-node-id="xqYLHI3hoP1JjbnI1pmgyj">Portfolio</h1>
+        <p class="brand__sub" id="brandSub" data-page-node-id="I4Yn3MLDQhElN5VBBaoh3A">UI / UX Design</p>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav" role="tablist" aria-orientation="vertical" aria-label="作品集章节" data-page-node-id="guvP3JCuhYz1FSEzf3aKS0"></nav>
+  </aside>
+
+  <!-- 右侧主内容区 -->
+  <main class="stage" id="stage" data-page-node-id="PzMqFjBvEOLyELDjEvY8Qd">
+    <!-- 浮动状态条 -->
+    <div class="hud" id="hud" aria-hidden="true" data-page-node-id="LkaWNDLVBPk4v1mPuBqJUK">
+      <span class="hud__name" id="hudName" data-page-node-id="A9oqNMlTxCTGG00j7WtOcl"></span>
+      <span class="hud__idx" id="hudIdx" data-page-node-id="hLSbyRDR7WVBDFvT63crxm">01</span>
+      <span class="hud__total" id="hudTotal" data-page-node-id="EleR8eLkxQHE68asCqxpWr">/ 01</span>
+    </div>
+
+    <!-- 章节内容容器（滚动 + 逐屏吸附） -->
+    <div class="viewport" id="viewport" tabindex="-1" data-page-node-id="wFMwMzLDfY6czyK21nz5ER"></div>
+
+    <!-- 章节切换（上下箭头，居中放在图片下方） -->
+    <div class="pager" data-page-node-id="KCuEMftCXixn9qlz9d2trE">
+      <button class="pager__btn glass" id="prevBtn" aria-label="上一章节" title="上一章节" data-page-node-id="RpFl9JJB1z6fEFYD1a7QMl">
+        <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="6N3fVEAFqkvUfsrerIK8As"><path d="M5 15l7-7 7 7" data-page-node-id="6dtpUnrdzHTFO3ospYLOmV" /></svg>
+      </button>
+      <button class="pager__btn glass" id="nextBtn" aria-label="下一章节" title="下一章节" data-page-node-id="Zv0N5TyME4EvjWpvWGEsFc">
+        <svg viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="mErCeDZH4NDbG0r3ZnhJH2"><path d="M5 9l7 7 7-7" data-page-node-id="whGGnaJV765MMi1TwLNwqM" /></svg>
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- 图片灯箱 -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="作品大图查看" hidden data-page-node-id="zpbjNNYRdyccaB9mwc8FdW">
+  <div class="lightbox__backdrop" data-close data-page-node-id="G9dI2oE1d8h4OjxtF4XNTD"></div>
+  <div class="lightbox__inner" data-page-node-id="rWdtDVir3CZ2EeSDma7WRA">
+    <div class="lightbox__stage" id="lbStage" data-page-node-id="UnoWwdYUVRt2ZNeR7hjdHT"></div>
+  </div>
+  <div class="lightbox__tools glass" role="toolbar" aria-label="查看工具" data-page-node-id="Z0HYPj2h9EN97449S5msZf">
+    <button class="tool" id="lbPrev" aria-label="上一张" data-page-node-id="1DJ9SCsPjYuHMDQlZY4csC"><svg viewBox="0 0 24 24" data-page-node-id="tZWi6kMGUz9zhaeEWx8kfG"><path d="M15 5l-7 7 7 7" data-page-node-id="RSwwVx6m9qs8905syU5QDd" /></svg></button>
+    <button class="tool" id="lbNext" aria-label="下一张" data-page-node-id="jAfNPNDwo0pvNVzBbGGw7G"><svg viewBox="0 0 24 24" data-page-node-id="U5dJpB5MIjj4k6C355Lfu0"><path d="M9 5l7 7-7 7" data-page-node-id="cZOL1wUyT96WPGNRsLfvHQ" /></svg></button>
+    <span class="tool__sep" aria-hidden="true" data-page-node-id="cYHcTyUYCDoZ5Dx16Qvm4S"></span>
+    <button class="tool" id="lbZoomOut" aria-label="缩小" data-page-node-id="U3lNOPY3eoHfWNZbUAHnm3"><svg viewBox="0 0 24 24" data-page-node-id="2110GV0M2nZINXUfkXkKn3"><path d="M5 12h14" data-page-node-id="EJt7IW4khGCJzgqRSzKqz1" /></svg></button>
+    <button class="tool" id="lbZoomReset" aria-label="适应屏幕" data-page-node-id="77PSLfPv30jBXy8tqwypRR"><svg viewBox="0 0 24 24" data-page-node-id="xpVtqZa1OE9NXf0CbWj7To"><path d="M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5" data-page-node-id="FD8V6sA1kZNE3AbJw9Uqa6" /></svg></button>
+    <button class="tool" id="lbZoomIn" aria-label="放大" data-page-node-id="vsUDC3bw6RgGJlc6FKDrN8"><svg viewBox="0 0 24 24" data-page-node-id="IuFEsMvDZzF69y3DMVoP8g"><path d="M12 5v14M5 12h14" data-page-node-id="xhLCbUT5tpJjmNw5qM6Juv" /></svg></button>
+    <span class="tool__sep" aria-hidden="true" data-page-node-id="JOBJiU5y1q5KRigD90dCA0"></span>
+    <a class="tool" id="lbRaw" target="_blank" rel="noopener" aria-label="在新窗口打开原图" data-page-node-id="IX8RfCY6UlMzDsCyx8oiKg"><svg viewBox="0 0 24 24" data-page-node-id="247hd6U1X5LM22WF6PBFdt"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" data-page-node-id="LAUeFzKNbcxQuQ9DvPWofL" /></svg></a>
+    <button class="tool tool--close" id="lbClose" aria-label="关闭" data-page-node-id="cq6VhG0jsbT3TamHVjbbLn"><svg viewBox="0 0 24 24" data-page-node-id="Bk1ElszsvFY3QBt3AnYIpD"><path d="M6 6l12 12M18 6L6 18" data-page-node-id="N9M0lcYTXCDbtUtovngv9g" /></svg></button>
+  </div>
+</div>
+
+<noscript data-page-node-id="CoVWlOXYiu1FDJZI8CEghM">
+  <div class="fallback" data-page-node-id="Ll5EXean3Ak8HiANfDBy3B">本作品集需要启用 JavaScript 才能正常浏览。</div>
+</noscript>
+
+<!-- 脚本分层：工具 → 配置 → 渲染 → 交互 → 启动（经典脚本，支持直接双击打开） -->
+<script src="js/util.js"></script>
+<script src="js/config.js"></script>
+<script src="js/render.js"></script>
+<script src="js/carousel.js"></script>
+<script src="js/tiles.js"></script>
+<script src="js/stack.js"></script>
+<script src="js/reveal.js"></script>
+<script src="js/cursor.js"></script>
+<script src="js/lightbox.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/wheel.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

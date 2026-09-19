@@ -1,0 +1,182 @@
+/* ==========================================================================
+   responsive.css — 断点适配（桌面端优先，移动端基础可用）
+   ========================================================================== */
+
+/* 中屏：导航略收窄，排版留白收紧（导航与卡片间距仍保持 50px） */
+@media (max-width: 1280px) {
+  :root { --sidebar-w: 236px; --gutter: 16px; --media-h: calc(100vh - 224px); --media-h: calc(100dvh - 224px); }
+  .block { padding-right: var(--gutter); }
+  .nav__item { padding: 9px 6px 9px 14px; }
+}
+
+/* 窄屏 / 高度不足：压缩纵向留白，避免单图区块被挤爆 */
+@media (max-width: 1080px), (max-height: 760px) {
+  :root { --media-h: calc(100vh - 210px); --media-h: calc(100dvh - 210px); }
+  .block { gap: 12px; padding-top: calc(var(--gutter) + 16px); padding-bottom: calc(var(--gutter) + 16px); }
+  .media-grid { gap: 12px; }
+  .block--hero .media-grid { gap: 12px; }
+}
+
+/* --------------------------------------------------------------------------
+   ≤900px：切移动端形态 —— 顶栏 + 抽屉式导航
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  :root { --gutter: 14px; --media-h: calc(100vh - 180px); --media-h: calc(100dvh - 180px); }
+
+  .app { flex-direction: column; }
+
+  /* 移动端：导航收进抽屉，内容区不再需要给左侧导航留 50px */
+  .block { padding-left: var(--gutter); padding-right: var(--gutter); }
+  /* 封面本身已 fixed 全屏，移动端无需额外处理 */
+  .block--cover { padding: 0; }
+
+  /* 顶栏 */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding: 12px var(--gutter) 4px;
+    z-index: 30;
+  }
+
+  .topbar__menu {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-pill);
+    transition: background var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
+  }
+
+  .topbar__menu:hover { box-shadow: var(--glow-accent); }
+
+  .topbar__bars { display: grid; gap: 5px; width: 16px; }
+  .topbar__bars i {
+    display: block;
+    height: 1.5px;
+    border-radius: 2px;
+    background: var(--text-1);
+    transition: transform var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
+  }
+  .topbar__menu[aria-expanded="true"] .topbar__bars i:first-child { transform: translateY(3.25px) rotate(45deg); }
+  .topbar__menu[aria-expanded="true"] .topbar__bars i:last-child { transform: translateY(-3.25px) rotate(-45deg); }
+
+  .topbar__title {
+    font-size: 13.5px;
+    color: var(--text-2);
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* 抽屉（悬浮导航在移动端需要背景，保证盖在内容上仍可读） */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 40;
+    width: min(300px, 84vw);
+    flex-basis: auto;
+    margin: 0;
+    padding: 18px 14px 16px;
+    border-radius: 0 var(--r-xl) var(--r-xl) 0;
+    transform: translateX(-104%);
+    transition: transform var(--dur-3) var(--ease-out);
+    background: rgba(16, 19, 26, 0.86);
+    -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(160%);
+    backdrop-filter: blur(var(--blur-strong)) saturate(160%);
+  }
+
+  .sidebar.is-open { transform: none; }
+
+  /* 抽屉内导航恢复文档流（桌面端的绝对定位垂直居中不适用于抽屉） */
+  .nav {
+    position: static;
+    left: auto;
+    right: auto;
+    transform: none;
+    max-height: none;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .drawer-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgba(4, 5, 8, 0.6);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;      /* 关闭后彻底让出点击，避免遮罩残留吞掉点击 */
+    pointer-events: none;
+    transition: opacity var(--dur-2) var(--ease), visibility var(--dur-2) var(--ease);
+  }
+  .drawer-veil.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+
+  /* 主区域 */
+  .stage { flex: 1 1 auto; min-height: 0; }
+  .viewport { scroll-snap-type: y proximity; }
+
+  .hud { top: 8px; right: var(--gutter); padding: 6px 12px; }
+  .hud__name { max-width: 120px; }
+
+  .pager { bottom: calc(var(--gutter) - 2px); gap: 8px; }
+  .pager__btn { width: 36px; height: 36px; }
+}
+
+/* --------------------------------------------------------------------------
+   ≤640px：多图排版降级为纵向堆叠（手机上不硬塞 3 列）
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  :root { --media-h: calc(100vh - 200px); --media-h: calc(100dvh - 200px); }
+
+  .block--duo .media-grid,
+  .block--trio .media-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  /* hero 在手机上改为纵向堆叠，全部保持 16:9 */
+  .block--hero .media-grid { flex-direction: column; align-items: stretch; }
+
+  .block--flow .flow__row { justify-content: stretch; }
+  .block--flow .flow__row .media { width: 100%; }
+
+  /* 首屏全屏封面：文案区满屏、字号收敛 */
+  .cover__body { padding: 24px var(--gutter) 44px; }
+  .note--bare { max-width: 100%; }
+  .note--bare .note__title { font-size: clamp(24px, 7vw, 34px); }
+  .note--bare .note__text { font-size: 13.5px; }
+  .cover__body .note__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+
+  .block--note .note { padding: 24px 20px; }
+  .note__title { font-size: 22px; }
+  .note__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+}
+
+/* --------------------------------------------------------------------------
+   横屏手机 / 极矮视口
+   -------------------------------------------------------------------------- */
+@media (max-height: 560px) and (max-width: 900px) {
+  :root { --media-h: calc(100vh - 130px); --media-h: calc(100dvh - 130px); }
+  .topbar { padding-top: 8px; }
+  .block { padding-top: 10px; padding-bottom: 10px; }
+}
+
+/* --------------------------------------------------------------------------
+   打印（顺便支持导出为 PDF 作品集）
+   -------------------------------------------------------------------------- */
+@media print {
+  body { overflow: visible; background: #fff; color: #000; }
+  .app-bg, .sidebar, .topbar, .hud, .pager, .lightbox { display: none !important; }
+  .app { display: block; height: auto; }
+  .viewport { overflow: visible; height: auto; }
+  .block { min-height: 0; page-break-after: always; }
+  /* 封面在打印时回到文档流（fixed 会被重复打印到每一页） */
+  .block--cover { position: relative; inset: auto; z-index: auto; min-height: 100vh; }
+}

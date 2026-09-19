@@ -1,0 +1,160 @@
+/* ==========================================================================
+   carousel.css — 通栏无限滚动卡片跑马灯（layout:'gallery'）
+   参考 React Bits Pro「Hero 4 · Infinite scrolling video carousel marquee」
+   结构：大标题（纯白 · 阿里妈妈粗体 · 居中）→ 描述（24px · 居中）→ 通栏跑马灯
+   标题距上方最后一个卡片 80px（CSS calc 兜底 + carousel.js syncGap 实测校正）
+   跑马灯铺满窗口宽度（通栏，左右边缘直接裁切、不做渐隐），卡片无缝无限循环匀速滚动
+   卡片恒为 1440×900（16:10）→ 素材 object-fit:cover 完美呈现不裁切
+   位移由 carousel.js 用 requestAnimationFrame 驱动（非 CSS 步进动画）
+   ========================================================================== */
+
+.block--gallery {
+  min-height: 0;                 /* 不占满一屏，自然跟随上一屏 */
+  scroll-snap-align: none;
+  justify-content: center;
+  gap: 0;                        /* 间距交给子元素自己的 margin，保证精确 */
+  /* ★ 标题距上方最后一个卡片 80px：
+     上一屏卡片垂直居中，块底部留有 (视口高-88px-卡片高)/2 的弹性留白 + 88px 内边距，
+     这里用同一套变量公式把这段留白抵消掉，使文档流间距正好 80px */
+  margin-top: calc(80px - ((100vh - 88px - var(--media-h)) / 2) - 88px);
+  margin-top: calc(80px - ((100dvh - 88px - var(--media-h)) / 2) - 88px);
+}
+
+/* 标题 / 描述宽度对齐上方卡片：与 .block--single .media 同一公式 */
+.block--gallery > * {
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------- 01 大标题 */
+.gallery__title {
+  margin: 0 auto;                        /* ★ 水平居中（与上方卡片同轴） */
+  text-align: center;                    /* ★ 居中显示 */
+  color: #ffffff;                        /* ★ 纯白 */
+  font-family: var(--font-display);      /* ★ 阿里妈妈粗体（见 base.css @font-face） */
+  font-weight: 700;
+  font-size: clamp(34px, 4.4vw, 68px);
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-shadow: 0 2px 18px rgba(6, 8, 14, 0.5);
+}
+
+/* -------------------------------------------------------------- 02 描述 */
+.gallery__desc {
+  margin-top: 24px;                      /* ★ 描述在标题下方，间距 24px */
+  max-width: 1100px;
+  text-align: center;                    /* ★ 居中对齐 */
+  color: rgba(255, 255, 255, 0.5);       /* 整体 50% 白 */
+  font-size: 13.5px;
+  line-height: 2;
+}
+
+.gallery__em {
+  color: rgba(255, 255, 255, 1);         /* 强调段 100% 白 */
+  font-weight: 700;                      /* + 加粗 */
+}
+
+/* ---------------------------------------------------------- 03 通栏跑马灯 -----
+   断出内容列：宽度 100vw、margin-left 拉回 (100% − 100vw)/2，
+   使跑马灯以「内容区中轴」为中心铺满整个窗口宽度（左右通栏）。
+   注意：这里不做 overflow hidden —— 卡片要一直铺到窗口边缘，
+   裁切交给 .viewport 的 overflow-x:hidden，视觉上就是「通栏出血」。
+   左右边缘不做任何渐隐/虚化，卡片滚到窗口边缘直接裁切（纯净通栏）。 */
+.block--gallery > .gallery__carousel {
+  width: 100vw;
+  margin-left: calc((100% - 100vw) / 2);
+  margin-top: 36px;
+  position: relative;
+}
+
+.carousel__viewport {
+  overflow: hidden;                      /* 裁切越界卡片，轨道平移在其内进行 */
+  touch-action: pan-y;                   /* 横向拖拽交给我们，纵向仍可滚页面 */
+  cursor: grab;
+  position: relative;
+  z-index: 1;
+}
+
+.gallery__carousel.is-dragging .carousel__viewport { cursor: grabbing; }
+
+.carousel__track {
+  display: flex;
+  gap: 20px;
+  /* 位移由 rAF 逐帧写入 transform，因此这里不要 transition（否则会拖尾） */
+  will-change: transform;
+}
+
+/* 卡片：高 50vh（300~620px），宽 = 高 × 1.6 → 严格 1440×900（16:10） */
+.gcard {
+  flex: 0 0 auto;
+  height: clamp(300px, 50vh, 620px);
+  aspect-ratio: 1440 / 900;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line-1);
+  background: var(--surface-1);
+  cursor: zoom-in;
+  user-select: none;                     /* 拖拽时不选中文字 / 图片 */
+  -webkit-user-select: none;
+  transition: transform 0.5s var(--ease-out), border-color var(--dur-line) var(--ease-line),
+    filter 0.5s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 竖版画廊变体（config: ratio:'portrait'）：手机页面比例 750×1624，
+   素材 app-e10-*.jpg 同比例出图 → cover 逐像素贴合不裁切；卡片略高更接近真机观感 */
+.block--gallery--portrait .gcard {
+  height: clamp(340px, 58vh, 720px);
+  aspect-ratio: 750 / 1624;
+}
+
+@media (max-width: 720px) {
+  .block--gallery--portrait .gcard { height: clamp(300px, 52vh, 520px); }
+}
+
+.gcard:hover,
+.gcard:focus-visible {
+  border-color: var(--line-hover);        /* 冷白柔描边（28%），由 --dur-line 缓入 */
+  filter: brightness(1.08);
+  transform: translateY(-4px);
+}
+
+.gcard__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 素材与卡片同为 16:10 → cover 即逐像素贴合，不裁切不留边 */
+.gcard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.gcard__media.is-failed::after {
+  content: "素材未找到";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--text-3);
+  background: var(--surface-1);
+}
+
+/* ------------------------------------------------------------- 响应式 */
+@media (max-width: 720px) {
+  .gcard { height: clamp(220px, 36vh, 420px); }
+}
+
+/* 减少动效：不自动滚动（carousel.js 里 REDUCED 直接停住），仍可手动拖拽 */
+@media (prefers-reduced-motion: reduce) {
+  .gcard { transition: none; }
+  .gcard:hover { transform: none; }
+}

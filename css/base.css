@@ -1,0 +1,214 @@
+/* ==========================================================================
+   base.css — 设计令牌 / 重置 / 全局背景
+   改配色只需要改下面的 CSS 变量，全站生效。
+   ========================================================================== */
+
+/* ---- 展示用字体：阿里妈妈数黑体 Bold（免费商用） ----------------------------
+   本地文件 assets/fonts/AlimamaShuHeiTi-Bold.woff2（离线可用，双击 index.html 也能加载）
+   替换方法：把新的字体文件丢进 assets/fonts/ 并改下面的 url 即可 */
+@font-face {
+  font-family: "Alimama ShuHeiTi";
+  src: local("Alimama ShuHeiTi Bold"),
+       local("阿里妈妈数黑体 Bold"),
+       url("../assets/fonts/AlimamaShuHeiTi-Bold.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* 展示型粗体（画廊大标题等）：阿里妈妈数黑体 → 系统粗体兜底 */
+  --font-display: "Alimama ShuHeiTi", "Alibaba PuHuiTi", "PingFang SC",
+    "Microsoft YaHei", "Noto Sans SC", sans-serif;
+
+  /* ---- 色板：深色 + 低饱和，避免高饱和刺眼 ---- */
+  --bg-0: #07080b;
+  --bg-1: #0b0d12;
+  --bg-2: #10131a;
+
+  /* 毛玻璃表面（叠在深色背景上的半透明白） */
+  --surface-1: rgba(255, 255, 255, 0.042);
+  --surface-2: rgba(255, 255, 255, 0.068);
+  --surface-3: rgba(255, 255, 255, 0.105);
+
+  /* 细分描边 */
+  --line-1: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.15);
+  --line-3: rgba(255, 255, 255, 0.24);
+  /* 作品卡片 hover 描边：偏冷的柔白，亮度压到 28%（原来是 40% 纯白，偏"硬"） */
+  --line-hover: rgba(230, 238, 255, 0.28);
+
+  /* 文字层级（次要信息主动降对比度） */
+  --text-1: #f4f6fa;   /* 标题 / 主信息 */
+  --text-2: #aab2c0;   /* 正文 / 次要 */
+  --text-3: #6e7686;   /* 辅助 / 编号 */
+
+  /* 点缀色：柔和蓝紫 + 薄荷，只做光晕与指示，不做大面积填充 */
+  --accent: #9bb0ff;
+  --accent-2: #8fe3d5;
+  --accent-a: rgba(155, 176, 255, 0.45);
+  --accent-b: rgba(143, 227, 213, 0.35);
+
+  /* 阴影 / 光晕 */
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 26px 60px -22px rgba(0, 0, 0, 0.85);
+  --glow-accent: 0 0 30px -6px var(--accent-a), 0 0 0 1px rgba(255, 255, 255, 0.09);
+
+  /* 毛玻璃 */
+  --blur: 20px;
+  --blur-strong: 34px;
+
+  /* 圆角 */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* 动效曲线（克制、丝滑） */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 0.18s;
+  --dur-2: 0.32s;
+  --dur-3: 0.5s;
+
+  /* 卡片 hover 描边：时长比常规动效更长 + 曲线先缓后慢收 —— "线"是慢慢浮出来的，
+     不是"啪"地亮起来（配合 --line-hover 的低亮度，整体更柔） */
+  --dur-line: 0.72s;
+  --ease-line: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 尺寸 */
+  --sidebar-w: 268px;
+  --gutter: 20px;
+  --gap-nav: 50px;                 /* 左侧悬浮导航与作品卡片之间的间距（要求 ≥50px） */
+  --media-ratio: 16 / 9;           /* 作品素材统一比例：1920×1080 */
+  --media-h: calc(100vh - 236px);  /* 作品卡片的可用高度（vhh 兜底给老浏览器） */
+  --media-h: calc(100dvh - 236px);
+
+  color-scheme: dark;
+}
+
+/* --------------------------------------------------------------------------
+   重置
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  overflow: hidden; /* 由内部容器各自滚动 */
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
+}
+
+h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+img, video, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+::selection { background: rgba(155, 176, 255, 0.28); }
+
+/* 鼠标滚轮 / 键盘滚动条：细、低对比 */
+.viewport::-webkit-scrollbar,
+.nav::-webkit-scrollbar { width: 8px; }
+.viewport::-webkit-scrollbar-thumb,
+.nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.viewport::-webkit-scrollbar-thumb:hover,
+.nav::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); background-clip: content-box; }
+.viewport::-webkit-scrollbar-track { background: transparent; }
+
+/* --------------------------------------------------------------------------
+   背景层：静态径向柔光 + 极轻噪点（无动画，零重绘开销）
+   -------------------------------------------------------------------------- */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 60%, #06070a 100%);
+}
+
+.app-bg::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background:
+    /* 左上 */
+    radial-gradient(36% 30% at 10% 4%, rgba(120, 142, 255, 0.13), transparent 68%),
+    /* 右上 */
+    radial-gradient(32% 26% at 92% 12%, rgba(90, 220, 205, 0.09), transparent 70%),
+    /* 右下 */
+    radial-gradient(46% 38% at 62% 104%, rgba(150, 118, 255, 0.11), transparent 72%),
+    /* 左下（很淡的冷色柔光，只做角落呼应） */
+    radial-gradient(40% 34% at 4% 98%, rgba(122, 152, 255, 0.04), transparent 72%),
+    /* 左下内侧的薄荷补光，避免单色块显得平 */
+    radial-gradient(24% 20% at 21% 87%, rgba(143, 227, 213, 0.025), transparent 74%);
+}
+
+/* 噪点：data URI 的 SVG turbulence，静态贴图 */
+.app-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* --------------------------------------------------------------------------
+   毛玻璃工具类
+   -------------------------------------------------------------------------- */
+.glass {
+  background: var(--surface-1);
+  border: 1px solid var(--line-1);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  box-shadow: var(--shadow-1);
+  border-radius: var(--r-lg);
+}
+
+/* 不支持 backdrop-filter 的浏览器：提高不透明度兜底，保证可读性 */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .glass { background: rgba(20, 23, 30, 0.92); }
+}
+
+.fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+/* --------------------------------------------------------------------------
+   无障碍：尊重系统的「减少动态效果」设置
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0.01ms; --dur-2: 0.01ms; --dur-3: 0.01ms; }
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .viewport { scroll-behavior: auto !important; }
+}

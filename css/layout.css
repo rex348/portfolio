@@ -1,0 +1,422 @@
+/* ==========================================================================
+   layout.css — 整体骨架：左导航 + 右内容 + 逐屏区块排版
+   ========================================================================== */
+
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   左侧固定导航（纯文字悬浮：无卡片背景 / 无边框 / 无投影 / 无底部信息）
+   注意：移动端抽屉形态需要背景，见 responsive.css
+   -------------------------------------------------------------------------- */
+.sidebar {
+  position: relative;      /* 作为 .nav 绝对定位（垂直居中）的基准 */
+  flex: 0 0 var(--sidebar-w);
+  width: var(--sidebar-w);
+  margin: var(--gutter) 0 var(--gutter) var(--gutter);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 6px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 8px 18px;
+}
+
+.brand__mark {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;            /* 头像圆形裁切，竖版源图不变形 */
+  border: 1px solid rgba(255, 255, 255, 0.16);   /* 细亮边增强轮廓 */
+  box-shadow: 0 0 20px -2px var(--accent-a);
+}
+
+.brand__text { min-width: 0; }
+
+.brand__title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand__sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* 章节导航列表：整体在屏幕竖直方向居中（左侧距离保持不变） */
+.nav {
+  position: absolute;
+  top: 50%;
+  left: 6px;               /* 与原侧栏 padding 对齐 */
+  right: 6px;
+  transform: translateY(-50%);
+  max-height: calc(100% - 160px);   /* 矮屏上限：不与顶部品牌区重叠，超出滚动 */
+  /* 纵向可滚（矮屏兜底），横向必须裁掉 ——
+     tab hover 的 translateX(4px) 会造成 4px 横向溢出，
+     若不裁切，overflow-y:auto 会把横轴也算作 auto，底部弹出横向滚动条，
+     滚动条占高后内容被挤压、整组 tab 上移 */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 视觉上不显示滚动条（滚动能力保留：滚轮 / 键盘仍可滚），彻底杜绝出现滚动条导致的位移 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav::-webkit-scrollbar { width: 0; height: 0; }
+
+/* --------------------------------------------------------------------------
+   右侧主内容区
+   -------------------------------------------------------------------------- */
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 滚动容器：逐屏吸附（proximity = 轻微吸附，不打断自由滚动） */
+.viewport {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 始终为滚动条预留空间 ——
+     内容高度刚好一屏（如「关于我」）时滚动条不出现，若不留槽，
+     内容区会突然变宽（Windows 上 8~17px），切到该页时整块内容向右跳 */
+  scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  scroll-padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 章节容器：撑满滚动容器高度，让内部 .block 的 min-height:100% 能正确解析为「一屏」 */
+.section {
+  height: 100%;
+  transition: opacity 0.16s linear, transform 0.16s var(--ease);
+}
+
+/* 一个区块 = 一屏
+   左内边距 = --gap-nav（50px），保证作品卡片与左侧悬浮导航互不重叠 */
+.block {
+  position: relative;
+  min-height: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: calc(var(--gutter) + 24px) calc(var(--gutter) + 10px) calc(var(--gutter) + 24px) var(--gap-nav);
+}
+
+.block__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 2px;
+  max-width: 1400px;
+}
+
+.block__no {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.block__title { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.block__desc { font-size: 12.5px; color: var(--text-3); }
+
+/* --------------------------------------------------------------------------
+   媒体排版：single / duo / trio / hero / flow
+   -------------------------------------------------------------------------- */
+.media-grid {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 1760px;      /* 超宽屏收敛，避免图片被拉得过大 */
+  margin-inline: auto;
+}
+
+.block--single .media-grid { grid-template-columns: minmax(0, 1fr); }
+.block--duo .media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.block--trio .media-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* --- 卡片尺寸：统一按素材比例 1920×1080（16:9）自适应 ---
+   宽 = min(可用宽度, 可用高度换算宽度)，因此：
+   · 换任何 1920×1080 的图都不会留边、不会被裁切
+   · 卡片永远在内容区水平居中，且不会在矮屏上被挤爆 */
+.block--single .media {
+  width: min(100%, calc(var(--media-h) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+}
+
+.block--duo .media,
+.block--trio .media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+/* hero：左大 + 右侧上下两张（用 flex 而不是 grid，三张都能保持 16:9 不留边） */
+.block--hero .media-grid {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* 容器宽度上限 = 让右侧两图叠起来也不超过可用高度 */
+  width: min(100%, calc(var(--media-h) * 2.4));
+  margin-inline: auto;
+}
+
+.block--hero .hero__main { flex: 1.9 1 0; }
+.block--hero .hero__side { flex: 1 1 0; display: flex; flex-direction: column; gap: 14px; }
+.block--hero .media { width: 100%; aspect-ratio: 16 / 9; }
+
+/* flow：上下错落两张（宽度不等、左右交替） */
+.block--flow { justify-content: flex-start; }
+.block--flow .media-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  width: min(100%, calc(var(--media-h) * 1.45));
+  margin-inline: auto;
+}
+.block--flow .flow__row { display: flex; width: 100%; }
+.block--flow .flow__row:first-child { justify-content: flex-start; }
+.block--flow .flow__row:last-child { justify-content: flex-end; }
+.block--flow .flow__row:first-child .media { width: 64%; }
+.block--flow .flow__row:last-child .media { width: 55%; }
+.block--flow .media { aspect-ratio: 16 / 9; }
+
+/* --------------------------------------------------------------------------
+   文字卡片区块（用于封面 / 关于我）
+   卡片水平居中（对称留白，精确落在页面中轴），并带缓慢流动的柔光描边
+   -------------------------------------------------------------------------- */
+.block--note {
+  align-items: center;
+  /* 桌面端左右对称 → 卡片精确居中（内容区本身为左 50 / 右 30） */
+  padding-left: calc(var(--gutter) + 10px);
+}
+
+.block--note .note {
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.note {
+  position: relative;
+  max-width: 720px;
+  padding: 30px 32px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028));
+  border: 1px solid var(--line-1);
+  /* 深色投影 + 一圈很淡的冷色环境光：更"绚丽"但不刺眼、不抢内容 */
+  box-shadow: var(--shadow-2), 0 30px 100px -46px rgba(155, 176, 255, 0.55),
+    0 0 90px -50px rgba(143, 227, 213, 0.4);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+  backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+  overflow: hidden;
+  isolation: isolate;
+  transition: box-shadow var(--dur-3) var(--ease);
+}
+
+.note:hover {
+  box-shadow: var(--shadow-2), 0 36px 110px -44px rgba(155, 176, 255, 0.7),
+    0 0 110px -46px rgba(143, 227, 213, 0.5);
+}
+
+.block--note .note--wide { max-width: 900px; }
+
+/* 内部缓慢游移的柔光：让卡片"活着"，但亮度极低，不干扰阅读 */
+.note::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -30%;
+  top: -60%;
+  width: 160%;
+  height: 200%;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, rgba(155, 176, 255, 0.16), transparent 72%) 20% 30% / 70% 60% no-repeat,
+    radial-gradient(closest-side, rgba(143, 227, 213, 0.12), transparent 72%) 78% 72% / 60% 55% no-repeat;
+  animation: note-drift 18s ease-in-out infinite alternate;
+}
+
+/* 1px 渐变描边（静态，零重绘开销） */
+.note::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04) 38%,
+    rgba(143, 227, 213, 0.22) 68%, rgba(155, 176, 255, 0.3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity var(--dur-3) var(--ease);
+}
+
+.note:hover::after { opacity: 0.9; }
+
+@keyframes note-drift {
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to { transform: translate3d(4%, 3%, 0) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note::before { animation: none; }
+}
+
+/* 无卡片外壳（首屏封面文案直接用） */
+.note--bare {
+  max-width: 640px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+.note--bare::before,
+.note--bare::after { display: none; }
+.note--bare .note__title { font-size: clamp(30px, 3.4vw, 54px); }
+.note--bare .note__text { font-size: 15px; color: var(--text-2); max-width: 46ch; }
+
+.note__kicker {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding: 5px 11px;
+  border: 1px solid rgba(155, 176, 255, 0.28);
+  border-radius: var(--r-pill);
+  background: rgba(155, 176, 255, 0.07);
+  text-shadow: 0 0 14px rgba(155, 176, 255, 0.55);
+  box-shadow: 0 0 24px -10px var(--accent-a);
+}
+
+.note__title {
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+
+.note__text { color: var(--text-2); font-size: 14px; max-width: 62ch; }
+.note__text + .note__text { margin-top: 10px; }
+
+.note__meta {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px 24px;
+}
+
+.note__metaItem dt { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+.note__metaItem dd { margin: 3px 0 0; font-size: 13.5px; color: var(--text-1); }
+
+/* --------------------------------------------------------------------------
+   浮动状态条 + 章节翻页按钮
+   -------------------------------------------------------------------------- */
+.hud {
+  position: absolute;
+  top: calc(var(--gutter) + 6px);
+  right: calc(var(--gutter) + 10px);
+  z-index: 4;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line-1);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease);
+}
+
+.hud__name { font-size: 12px; color: var(--text-2); max-width: 220px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hud__idx { font-size: 12px; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.hud__total { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/* 章节翻页：上下箭头，水平居中放在图片下方 */
+.pager {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--gutter) - 2px);
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  gap: 10px;
+}
+
+.pager__btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease),
+    background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
+}
+
+.pager__btn svg { width: 18px; height: 18px; fill: none; stroke: var(--text-2); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.pager__btn:hover:not([disabled]) {
+  transform: translateY(-2px);
+  background: var(--surface-2);
+  border-color: var(--line-2);
+  box-shadow: var(--glow-accent);
+}
+
+.pager__btn:hover:not([disabled]) svg { stroke: var(--text-1); }
+.pager__btn[disabled] { opacity: 0.28; cursor: default; }
+
+/* --------------------------------------------------------------------------
+   移动端顶栏（桌面端默认隐藏，见 responsive.css）
+   -------------------------------------------------------------------------- */
+.topbar { display: none; }

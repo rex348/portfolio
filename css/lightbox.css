@@ -1,0 +1,154 @@
+/* ==========================================================================
+   lightbox.css — 大图查看层（缩放 / 拖拽 / 前后切换）
+   ========================================================================== */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease);
+}
+
+.lightbox[hidden] { display: none; }
+.lightbox.is-open { opacity: 1; }
+
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 46% at 50% 44%, rgba(155, 176, 255, 0.10), transparent 72%),
+    radial-gradient(46% 40% at 78% 82%, rgba(143, 227, 213, 0.07), transparent 74%),
+    rgba(4, 5, 8, 0.84);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+
+.lightbox__inner {
+  position: relative;
+  z-index: 1;
+  /* 尺寸由 .lightbox__stage 撑开：stage 按当前素材的真实比例定尺寸，
+     于是图片正好铺满舞台（不留背景空白），且不裁切、不拉伸 */
+  max-width: min(1560px, 90vw);
+  max-height: min(86dvh, 1000px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: scale(0.985);
+  opacity: 0;
+  transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-3) var(--ease-out);
+}
+
+.lightbox.is-open .lightbox__inner { transform: none; opacity: 1; }
+
+/* 图片舞台：缩放 / 拖拽容器（内容水平垂直居中）
+   尺寸 = min(上限, 按素材比例缩到最大)，由 lightbox.js 的 fitStage() 写入；
+   这里的默认值只是素材尺寸就绪前的占位 */
+.lightbox__stage {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(1560px, 90vw);
+  height: min(86vh, 1000px);
+  height: min(86dvh, 1000px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line-1);
+  background: rgba(255, 255, 255, 0.022);
+  box-shadow: 0 60px 140px -70px rgba(155, 176, 255, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  cursor: zoom-in;
+  touch-action: none;
+  /* 尺寸不做过渡：切换素材时瞬时切到新比例，保证任何时刻素材都是「刚好铺满」的 */
+}
+
+.lightbox__stage.is-zoomed { cursor: grab; }
+.lightbox__stage.is-panning { cursor: grabbing; }
+
+/* 素材铺满舞台：舞台比例已与素材一致，contain 即「正好填满」；
+   万一尺寸尚未算好（加载中），contain 也保证不变形、不裁切 */
+.lightbox__stage img,
+.lightbox__stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transform-origin: center center;
+  transition: transform 0.22s var(--ease-out);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lightbox__stage.is-panning img { transition: none; }
+.lightbox__stage.is-zoomed { cursor: grab; }
+
+/* 工具条 */
+.lightbox__tools {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(var(--gutter) + 2px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tool {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: background var(--dur-1) var(--ease), transform var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease);
+}
+
+.tool svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--text-2);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke var(--dur-1) var(--ease);
+}
+
+.tool:hover { background: rgba(255, 255, 255, 0.09); transform: translateY(-1px); box-shadow: 0 0 20px -6px var(--accent-a); }
+.tool:hover svg { stroke: var(--text-1); }
+.tool[disabled] { opacity: 0.3; cursor: default; }
+.tool[disabled]:hover { background: none; transform: none; box-shadow: none; }
+.tool--close:hover { background: rgba(255, 120, 120, 0.16); }
+
+.tool__sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--line-2);
+}
+
+/* 灯箱打开时锁住背景滚动 */
+.is-locked .viewport { overflow: hidden; }
+
+.lb-fail {
+  padding: 24px;
+  font-size: 13px;
+  color: var(--text-3);
+  text-align: center;
+  line-height: 1.9;
+}
+
+@media (max-width: 720px) {
+  .lightbox__inner { max-width: 94vw; max-height: 80vh; }
+  .lightbox__stage { width: 94vw; height: 80vh; }
+  .lightbox__tools { bottom: calc(var(--gutter) - 4px); }
+  .tool { width: 34px; height: 34px; }
+}

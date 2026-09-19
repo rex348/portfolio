@@ -1,0 +1,151 @@
+/* ==========================================================================
+   cover.css — 首屏全屏封面（视频 / 动图 / 图片 铺满整屏）
+   --------------------------------------------------------------------------
+   全屏规则：
+   · 封面用 position: fixed 铺满整个视口（含左侧导航下方），真·全屏；
+     不能用负 margin —— 滚动容器 overflow-x:hidden 会把左侧裁掉，
+     留下一条与导航同宽的暗带，看起来像 Tab 有矩形背景卡
+   · z-index: -1 沉到 .app 内容层之下：Tab 文字、HUD、翻页按钮都悬浮其上
+   · 素材建议 1920×1080；竖屏手机同样铺满（cover 自动裁切两侧）
+   ========================================================================== */
+
+.block--cover {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  padding: 0;
+  min-height: 0;
+}
+
+.cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #06070a;
+}
+
+/* 视频 / 动图 / 图片：统一铺满、居中偏上取景 */
+.cover__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+}
+
+/* 压暗层：保证任何画面上文案都清晰（左侧更暗，给导航与标题留出对比） */
+.cover__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(95deg, rgba(6, 7, 10, 0.9) 0%, rgba(6, 7, 10, 0.56) 32%,
+      rgba(6, 7, 10, 0.12) 60%, rgba(6, 7, 10, 0.4) 100%),
+    linear-gradient(180deg, rgba(6, 7, 10, 0.66) 0%, rgba(6, 7, 10, 0.14) 30%,
+      rgba(6, 7, 10, 0.42) 74%, rgba(6, 7, 10, 0.88) 100%);
+}
+
+/* 纯背景封面（无文案）：只留极轻的上下渐晕 + 左缘一条很淡的过渡压暗，
+   保证悬浮 Tab 压在明亮画面上仍可读；压暗带宽而缓，避免形成"矩形暗卡" */
+.cover--bare .cover__scrim {
+  background:
+    linear-gradient(95deg, rgba(6, 7, 10, 0.38) 0%, rgba(6, 7, 10, 0.14) 11%, transparent 26%),
+    linear-gradient(180deg, rgba(6, 7, 10, 0.26) 0%, transparent 16%,
+      transparent 84%, rgba(6, 7, 10, 0.34) 100%);
+}
+
+/* 文案浮层：占据整屏，垂直居中；左内边距避开左侧悬浮导航 */
+.cover__body {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 34px calc(var(--gutter) + 10px) 52px
+    calc(var(--sidebar-w) + var(--gutter) + var(--gap-nav));
+}
+
+/* 首屏的输入动效：文案依次浮起 */
+.block--cover .note__kicker,
+.block--cover .note__title,
+.block--cover .note__text,
+.block--cover .note__meta {
+  animation: cover-rise 0.9s var(--ease-out) both;
+}
+.block--cover .note__title { animation-delay: 0.08s; }
+.block--cover .note__text { animation-delay: 0.16s; }
+.block--cover .note__meta { animation-delay: 0.24s; }
+
+@keyframes cover-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block--cover .note__kicker,
+  .block--cover .note__title,
+  .block--cover .note__text,
+  .block--cover .note__meta { animation: none; }
+}
+
+/* 封面文案里的 meta 分隔线稍微亮一点，压在图上也能看清 */
+.cover__body .note__meta { max-width: 660px; }
+.cover__body .note__metaItem dd { font-size: 13px; }
+
+/* ==========================================================================
+   封面主标题（coverTitle）—— 参考海报式排版：
+   超大号重型展示字（阿里妈妈数黑体）、整体微斜、纯白、上下两行；
+   下方一行加粗小字署名。左对齐落在内容区（避开左侧悬浮导航）。
+   ========================================================================== */
+
+.cover__hero {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(64px, 10.5vw, 168px);   /* 足够「大」：1440 屏 ≈ 151px/行 */
+  line-height: 1.02;
+  letter-spacing: 0.015em;
+  transform: skewX(-8deg);                 /* 斜体观感（展示字自体不带 italic） */
+  transform-origin: left bottom;
+  text-shadow: 0 4px 28px rgba(4, 6, 12, 0.55), 0 1px 0 rgba(255, 255, 255, 0.12);
+  user-select: none;
+}
+
+.cover__heroLine {
+  display: block;
+  white-space: nowrap;
+  /* 逐行浮起入场（cover-rise 已有，按 --ci 错峰） */
+  animation: cover-rise 0.9s var(--ease-out) both;
+  animation-delay: calc(0.08s + var(--ci, 0) * 0.1s);
+}
+
+/* 副标题：加粗白字、略收字距，紧贴主标题下方 */
+.cover__sub {
+  margin: clamp(18px, 2.6vh, 30px) 0 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 700;
+  font-size: clamp(17px, 1.7vw, 25px);
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 16px rgba(4, 6, 12, 0.6);
+  animation: cover-rise 0.9s var(--ease-out) both;
+  animation-delay: calc(0.08s + var(--ci, 0) * 0.1s + 0.12s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover__heroLine,
+  .cover__sub { animation: none; }
+}
+
+@media (max-width: 720px) {
+  .cover__hero { font-size: clamp(44px, 13vw, 84px); }
+  .cover__sub { font-size: clamp(14px, 4vw, 18px); }
+}
