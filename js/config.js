@@ -244,7 +244,7 @@ PF.config = {
               title: '主题登录页 · 元旦' },
             { src: 'assets/video/zq-03.mp4', poster: 'assets/poster/zq-03.jpg',
               title: '主题登录页 · 中秋' },
-            { src: 'xn-04.png', title: '主题登录页 · 新年' },
+            { src: 'xn-04.jpg', title: '主题登录页 · 新年' },
             { src: 'assets/video/qiche-05.mp4', poster: 'assets/poster/qiche-05.jpg',
               title: '主题登录页 · 汽车' },
             { src: 'assets/video/jc-06.mp4', poster: 'assets/poster/jc-06.jpg',
